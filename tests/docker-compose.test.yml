@@ -1,0 +1,31 @@
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: safescale_test
+      POSTGRES_PASSWORD: safescale_test
+      POSTGRES_DB: safescale_test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U safescale_test"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+
+  localstack-test:
+    image: localstack/localstack:latest
+    ports:
+      - "4567:4566"
+    environment:
+      SERVICES: rds,ec2,elasticache,eks,ecs,elbv2,s3,cloudwatch,ce,sts,iam,opensearch,kafka,efs,route53,es,pricing
+      DEFAULT_REGION: us-east-1
+    tmpfs:
+      - /var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5

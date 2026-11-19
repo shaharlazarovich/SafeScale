@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: safescale
+      POSTGRES_PASSWORD: safescale
+      POSTGRES_DB: safescale
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U safescale"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: rds,ec2,elasticache,eks,ecs,elbv2,s3,cloudwatch,ce,sts,iam,opensearch,kafka,efs,route53,es,pricing
+      DEFAULT_REGION: us-east-1
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  localstack_data:
